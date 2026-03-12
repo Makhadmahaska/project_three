@@ -1,35 +1,29 @@
-import prisma from "../db/prisma";
+import prisma from "../lib/prisma"
 
 export async function getStudentGrades(studentId: number) {
+
   const student = await prisma.student.findUnique({
     where: { id: studentId },
     include: {
       grades: {
-        include: {
-          subject: true
-        },
+        include: { subject: true },
         orderBy: {
-          subject: {
-            year: "asc"
-          }
+          subject: { year: "asc" }
         }
       }
     }
-  });
+  })
 
-  if (!student) {
-    return null;
-  }
+  if (!student) return null
 
   return {
     id: student.id,
     fullName: student.fullName,
-    grades: student.grades.map((grade) => ({
-      id: grade.id,
-      value: grade.value,
-      subjectId: grade.subjectId,
-      subjectName: grade.subject.name,
-      year: grade.subject.year
+    grades: student.grades.map(g => ({
+      id: g.id,
+      value: g.value,
+      subject: g.subject.name,
+      year: g.subject.year
     }))
-  };
+  }
 }
