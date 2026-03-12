@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { Role } from "@prisma/client";
+import { Role } from "../../generated/prisma/enums"
 import { jwtSecret } from "../config";
 
 export interface AuthUser extends JwtPayload {
