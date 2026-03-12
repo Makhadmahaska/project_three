@@ -1,29 +1,23 @@
-import express, { Response } from "express";
-import { AuthRequest, requireAuth, requireRole } from "../middleware/auth";
-import { getStudentGrades } from "../services/studentService";
+import express from "express"
+import { requireAuth, requireRole, AuthRequest } from "../middleware/auth"
+import { Role } from "../../generated/prisma/client"
+import { getStudentGrades } from "../services/studentService"
 
-const router = express.Router();
+const router = express.Router()
 
-router.use(requireAuth, requireRole("STUDENT"));
+router.use(requireAuth, requireRole(Role.STUDENT))
 
-router.get("/me/grades", async (req: AuthRequest, res: Response) => {
-  try {
-    const studentId = req.user?.studentId;
+router.get("/me/grades", async (req: AuthRequest, res) => {
 
-    if (!studentId) {
-      return res.status(404).json({ message: "Student profile not found." });
-    }
+  const studentId = req.user?.studentId
 
-    const student = await getStudentGrades(studentId);
-
-    if (!student) {
-      return res.status(404).json({ message: "Student not found." });
-    }
-
-    return res.status(200).json(student);
-  } catch {
-    return res.status(500).json({ message: "Could not load grades." });
+  if (!studentId) {
+    return res.status(404).json({ message: "Student profile missing" })
   }
-});
 
-export default router;
+  const student = await getStudentGrades(studentId)
+
+  res.json(student)
+})
+
+export default router
