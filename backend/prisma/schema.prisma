@@ -12,42 +12,56 @@ datasource db {
   provider = "postgresql"
 }
 
-
 enum Role {
- ADMIN
- STUDENT
+  ADMIN
+  STUDENT
+}
+
+enum GradeValue {
+  A
+  B
+  C
+  D
+  E
+  F
 }
 
 model User {
- id       Int    @id @default(autoincrement())
- email    String @unique
- firebaseUid String @unique
- role     Role
- student  Student?
+  id          Int     @id @default(autoincrement())
+  email       String  @unique
+  firebaseUid String  @unique
+  role        Role
+
+  student     Student?
 }
 
 model Student {
- id     Int    @id @default(autoincrement())
- name   String
- userId Int    @unique
- user   User   @relation(fields: [userId], references: [id])
- grades Grade[]
+  id       Int     @id @default(autoincrement())
+  fullName String
+
+  userId   Int     @unique
+  user     User    @relation(fields: [userId], references: [id])
+
+  grades   Grade[]
 }
 
 model Subject {
- id     Int    @id @default(autoincrement())
- name   String
- grades Grade[]
+  id    Int    @id @default(autoincrement())
+  name  String
+  year  Int
+
+  grades Grade[]
 }
 
 model Grade {
- id        Int     @id @default(autoincrement())
- value     Float
- studentId Int
- subjectId Int
+  id        Int        @id @default(autoincrement())
+  value     GradeValue
 
- student Student @relation(fields: [studentId], references: [id])
- subject Subject @relation(fields: [subjectId], references: [id])
+  studentId Int
+  subjectId Int
 
- @@unique([studentId, subjectId])
+  student Student @relation(fields: [studentId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
+
+  @@unique([studentId, subjectId])
 }
