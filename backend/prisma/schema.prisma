@@ -21,7 +21,7 @@ enum Role {
 model User {
  id       Int    @id @default(autoincrement())
  email    String @unique
- password String
+ firebaseUid String @unique
  role     Role
  student  Student?
 }
