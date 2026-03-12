@@ -1,4 +1,4 @@
-import prisma from "../lib/prisma"
+import { prisma } from "../../lib/db";
 import { GradeValue } from "../../generated/prisma/client"
 
 export async function listStudents() {

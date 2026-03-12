@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express"
-import admin from "../config/firebase"
-import prisma from "../lib/prisma"
+import  admin from "../../firebase";
+import { prisma } from "../../lib/db";
 import { Role } from "../../generated/prisma/client"
 
 export interface AuthUser {

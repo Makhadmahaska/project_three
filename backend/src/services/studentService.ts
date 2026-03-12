@@ -1,5 +1,4 @@
-import prisma from "../lib/prisma"
-
+import { prisma } from "../../lib/db";
 export async function getStudentGrades(studentId: number) {
 
   const student = await prisma.student.findUnique({
