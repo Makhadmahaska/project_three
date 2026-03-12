@@ -1,70 +1,71 @@
-import express, { Request, Response } from "express";
-import { requireAuth, requireRole } from "../middleware/auth";
+import express from "express"
+import { requireAuth, requireRole } from "../middleware/auth"
+import { Role } from "../../generated/prisma/client"
+import * as service from "../services/adminService"
 import {
-  createStudent,
-  createSubject,
-  listStudents,
-  listSubjects,
-  updateStudent,
-  upsertGrade
-} from "../services/adminService";
+  createStudentSchema,
+  updateStudentSchema,
+  createSubjectSchema,
+  upsertGradeSchema
+} from "../validation/schemas"
 
-const router = express.Router();
+const router = express.Router()
 
-router.use(requireAuth, requireRole("ADMIN"));
+router.use(requireAuth, requireRole(Role.ADMIN))
 
-router.get("/students", async (_req: Request, res: Response) => {
-  try {
-    const students = await listStudents();
-    return res.status(200).json(students);
-  } catch {
-    return res.status(500).json({ message: "Could not load students." });
-  }
-});
+router.get("/students", async (_req, res) => {
+  const students = await service.listStudents()
+  res.json(students)
+})
 
-router.post("/students", async (req: Request, res: Response) => {
-  try {
-    const result = await createStudent(req.body);
-    return res.status(result.status).json(result.body);
-  } catch {
-    return res.status(500).json({ message: "Could not create student." });
-  }
-});
+router.post("/students", async (req, res) => {
 
-router.put("/students/:studentId", async (req: Request, res: Response) => {
-  try {
-    const result = await updateStudent(Number(req.params.studentId), req.body);
-    return res.status(result.status).json(result.body);
-  } catch {
-    return res.status(500).json({ message: "Could not update student." });
-  }
-});
+  const data = createStudentSchema.parse(req.body)
 
-router.get("/subjects", async (_req: Request, res: Response) => {
-  try {
-    const subjects = await listSubjects();
-    return res.status(200).json(subjects);
-  } catch {
-    return res.status(500).json({ message: "Could not load subjects." });
-  }
-});
+  const student = await service.createStudent(data)
 
-router.post("/subjects", async (req: Request, res: Response) => {
-  try {
-    const result = await createSubject(req.body);
-    return res.status(result.status).json(result.body);
-  } catch {
-    return res.status(500).json({ message: "Could not create subject." });
-  }
-});
+  res.status(201).json(student)
+})
 
-router.post("/grades", async (req: Request, res: Response) => {
-  try {
-    const result = await upsertGrade(req.body);
-    return res.status(result.status).json(result.body);
-  } catch {
-    return res.status(500).json({ message: "Could not save grade." });
-  }
-});
+router.put("/students/:id", async (req, res) => {
 
-export default router;
+  const data = updateStudentSchema.parse(req.body)
+
+  const student = await service.updateStudent(
+    Number(req.params.id),
+    data.fullName
+  )
+
+  res.json(student)
+})
+
+router.get("/subjects", async (_req, res) => {
+
+  const subjects = await service.listSubjects()
+
+  res.json(subjects)
+})
+
+router.post("/subjects", async (req, res) => {
+
+  const data = createSubjectSchema.parse(req.body)
+
+  const subject = await service.createSubject(data.name, data.year)
+
+  res.status(201).json(subject)
+})
+
+router.post("/grades", async (req, res) => {
+
+  const data = upsertGradeSchema.parse(req.body)
+
+  const grade = await service.upsertGrade(
+    data.studentId,
+    data.subjectId,
+    data.value
+  )
+
+  res.json(grade)
+})
+
+export default router
