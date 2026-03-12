@@ -12,6 +12,11 @@ app.get("/test-db", async (req, res) => {
   }
 })
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000")
-})
+// start server only when not testing
+if (process.env.NODE_ENV !== "test") {
+  app.listen(3000, () => {
+    console.log("Server running on port 3000")
+  })
+}
+
+export default app
