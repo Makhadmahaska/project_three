@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import admin from "./firebase";
-import { prisma } from "./lib/db"
+import { prisma } from "./lib/db";
 import { Role } from "../../generated/prisma/enums";
 
 export interface AuthUser {
   uid: string;
   email?: string;
-  role?: Role;
+  role: Role;
   studentId?: number | null;
 }
 
@@ -31,7 +31,6 @@ export async function requireAuth(
   try {
     const decoded = await admin.auth().verifyIdToken(token);
 
-    // lookup user in database
     const user = await prisma.user.findUnique({
       where: { firebaseUid: decoded.uid },
       include: { student: true }
@@ -50,7 +49,7 @@ export async function requireAuth(
 
     next();
 
-  } catch {
+  } catch (error) {
     return res.status(401).json({ message: "Invalid or expired token." });
   }
 }
